@@ -18,11 +18,11 @@ namespace KurseWork_Network
         }
 
         // Добавление ребра
-        public void AddEdge(Node from, Node to, int weight)
+        public void AddEdge(Node from, Node to, int weight, ChannelType type, int errorProbability = 0)
         {
             if (Nodes.Contains(from) && Nodes.Contains(to))
             {
-                Edges.Add(new Edge(from, to, weight));
+                Edges.Add(new Edge(from, to, weight, type, errorProbability));
             }
         }
 
@@ -55,12 +55,16 @@ namespace KurseWork_Network
         public Node From { get; private set; } // Узел-источник
         public Node To { get; private set; } // Узел-назначение
         public int Weight { get; private set; } // Вес рёбра
+        public ChannelType Type { get; set; } // Тип канала
+        public double ErrorProbability { get; set; } // Вероятность ошибок (0-100%)
 
-        public Edge(Node from, Node to, int weight)
+        public Edge(Node from, Node to, int weight, ChannelType type, int errorProbability = 0)
         {
             From = from;
             To = to;
             Weight = weight;
+            Type = type;
+            ErrorProbability = errorProbability; // Значение от 0 до 100
         }
 
         // Метод для рисования рёбра
@@ -120,5 +124,11 @@ namespace KurseWork_Network
         }
 
 
+    }
+
+    public enum ChannelType
+    {
+        Duplex,      // Дуплексный
+        HalfDuplex   // Полудуплексный
     }
 }

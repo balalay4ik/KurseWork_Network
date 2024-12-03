@@ -86,7 +86,7 @@ public class RegionGenerator
                 if (currentEdgeCount < targetEdgeCount && random.NextDouble() < 0.5)
                 {
                     int weight = GetRandomWeight(); // Случайный вес рёбра
-                    tree.AddEdge(nodes[i], nodes[j], weight);
+                    tree.AddEdge(nodes[i], nodes[j], weight, ChannelType.Duplex);
                     currentEdgeCount++;
 
                     // Прерываем цикл, если достигли цели
@@ -139,7 +139,7 @@ public class RegionGenerator
             if (fromNode != null && toNode != null)
             {
                 int weight = GetRandomWeight();
-                tree.AddEdge(fromNode, toNode, weight);
+                tree.AddEdge(fromNode, toNode, weight, ChannelType.Duplex);
 
                 // Отмечаем узлы как использованные
                 usedNodes.Add(fromNode);
@@ -175,7 +175,7 @@ public class RegionGenerator
             if (fromNode != null && toNode != null)
             {
                 int weight = GetRandomWeight();
-                tree.AddEdge(fromNode, toNode, weight);
+                tree.AddEdge(fromNode, toNode, weight, ChannelType.Duplex);
                 usedNodes.Add(fromNode);
                 usedNodes.Add(toNode);
             }

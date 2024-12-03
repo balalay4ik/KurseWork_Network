@@ -13,6 +13,8 @@ namespace KurseWork_Network
         private NumericUpDown numericUpDown1 = new();
         private NumericUpDown numericUpDown2 = new();
         private Button btn = new();
+        private Button btn2 = new();
+        private Form2 form2 = new(); // Ссылка на вторую форму
 
         public Form1()
         {
@@ -40,10 +42,15 @@ namespace KurseWork_Network
             btn.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             btn.Click += btnGenerate_Click;
 
+            btn2.Location = new Point(605, 110);
+            btn2.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btn2.Click += btnOpenForm2_Click;
+
             Controls.Add(pbCanvas);
             Controls.Add(numericUpDown1);
             Controls.Add(numericUpDown2);
             Controls.Add(btn);
+            Controls.Add(btn2);
 
             // Подключаем обработчики событий мыши
             pbCanvas.Paint += PbCanvas_Paint;
@@ -59,6 +66,7 @@ namespace KurseWork_Network
             if (e.Button == MouseButtons.Left)
             {
                 Node clickedNode = FindNodeAt(e.X, e.Y);
+                
 
                 if (ModifierKeys.HasFlag(Keys.Control)) // Выделение с Ctrl
                 {
@@ -93,6 +101,8 @@ namespace KurseWork_Network
                 // Устанавливаем начальную точку для перемещения
                 mouseStart = new Point(e.X, e.Y);
                 isDragging = true;
+
+                LoadDataToForm2();
 
                 pbCanvas.Invalidate(); // Перерисовать
             }
@@ -182,6 +192,35 @@ namespace KurseWork_Network
                 }
             }
             return null;
+        }
+
+        private void btnOpenForm2_Click(object sender, EventArgs e)
+        {
+
+            LoadDataToForm2();
+
+            // Показываем вторую форму
+            form2.Show();
+        }
+
+        private void LoadDataToForm2()
+        {
+            // Выбираем начальный узел (можно улучшить выбор через интерфейс)
+            Node startNode = selectedNodes.FirstOrDefault();
+
+            if (startNode != null)
+            {
+                // Выполняем поиск кратчайших путей
+                ShortestPathSolver solver = new ShortestPathSolver(tree);
+                solver.FindShortestPaths(startNode);
+
+                // Получаем таблицу расстояний и маршруты
+                var distances = solver.GetDistanceTable();
+                var routes = solver.GetRoutes();
+
+                // Создаём вторую форму и передаём данные
+                form2.LoadData(distances, routes);
+            }
         }
     }
 }
