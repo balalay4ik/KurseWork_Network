@@ -14,7 +14,8 @@ namespace KurseWork_Network
         private NumericUpDown numericUpDown2 = new();
         private Button btn = new();
         private Button btn2 = new();
-        private Form2 form2 = new(); // Ссылка на вторую форму
+        private Form2? form2 = null; // Ссылка на вторую форму
+        private bool form2closed = true;
 
         public Form1()
         {
@@ -102,7 +103,8 @@ namespace KurseWork_Network
                 mouseStart = new Point(e.X, e.Y);
                 isDragging = true;
 
-                LoadDataToForm2();
+                if(!form2closed)
+                    LoadDataToForm2();
 
                 pbCanvas.Invalidate(); // Перерисовать
             }
@@ -194,9 +196,13 @@ namespace KurseWork_Network
             return null;
         }
 
+        private void Form2Closed(object? sender, EventArgs e) => form2closed = true;
+
         private void btnOpenForm2_Click(object sender, EventArgs e)
         {
-
+            form2 = new Form2();
+            form2closed = false;
+            form2.Closed += Form2Closed;
             LoadDataToForm2();
 
             // Показываем вторую форму
