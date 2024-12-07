@@ -112,8 +112,8 @@ public class RegionGenerator
 
         for (int i = 0; i < regions.Count - 1; i++)
         {
-            Node fromNode = null;
-            Node toNode = null;
+            Node? fromNode = null;
+            Node? toNode = null;
             double minDistance = double.MaxValue;
 
             // Находим ближайшие узлы между регионами, исключая уже использованные
@@ -150,8 +150,8 @@ public class RegionGenerator
         // Опционально: замыкание в кольцо
         if (regions.Count > 2)
         {
-            Node fromNode = null;
-            Node toNode = null;
+            Node? fromNode = null;
+            Node? toNode = null;
             double minDistance = double.MaxValue;
 
             foreach (var nodeA in regions[^1])
@@ -186,6 +186,7 @@ public class RegionGenerator
     // Метод для вычисления расстояния между узлами
     private double CalculateDistance(Node nodeA, Node nodeB)
     {
+        if(nodeA == null || nodeB == null) return 0;
         int dx = nodeA.X - nodeB.X;
         int dy = nodeA.Y - nodeB.Y;
         return Math.Sqrt(dx * dx + dy * dy);

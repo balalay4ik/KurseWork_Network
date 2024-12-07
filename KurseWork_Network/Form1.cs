@@ -62,11 +62,11 @@ namespace KurseWork_Network
         }
 
         // Обработчик нажатия мыши
-        private void PbCanvas_MouseDown(object sender, MouseEventArgs e)
+        private void PbCanvas_MouseDown(object? sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Left)
             {
-                Node clickedNode = FindNodeAt(e.X, e.Y);
+                Node? clickedNode = FindNodeAt(e.X, e.Y);
                 
 
                 if (ModifierKeys.HasFlag(Keys.Control)) // Выделение с Ctrl
@@ -111,7 +111,7 @@ namespace KurseWork_Network
         }
 
         // Обработчик перемещения мыши
-        private void PbCanvas_MouseMove(object sender, MouseEventArgs e)
+        private void PbCanvas_MouseMove(object? sender, MouseEventArgs e)
         {
             if (isDragging && selectedNodes.Count > 0 && e.Button == MouseButtons.Left)
             {
@@ -132,7 +132,7 @@ namespace KurseWork_Network
         }
 
         // Обработчик отпускания мыши
-        private void PbCanvas_MouseUp(object sender, MouseEventArgs e)
+        private void PbCanvas_MouseUp(object? sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Left)
             {
@@ -141,7 +141,7 @@ namespace KurseWork_Network
         }
 
         // Рисование дерева
-        private void PbCanvas_Paint(object sender, PaintEventArgs e)
+        private void PbCanvas_Paint(object? sender, PaintEventArgs e)
         {
             Graphics g = e.Graphics;
 
@@ -175,7 +175,7 @@ namespace KurseWork_Network
             pbCanvas.Invalidate();
         }
 
-        private void btnGenerate_Click(object sender, EventArgs e)
+        private void btnGenerate_Click(object? sender, EventArgs e)
         {
             int regionCount = (int)numericUpDown1.Value;
             int connectionsPerRegion = (int)numericUpDown2.Value;
@@ -184,7 +184,7 @@ namespace KurseWork_Network
         }
 
         // Поиск узла под указателем мыши
-        private Node FindNodeAt(int x, int y)
+        private Node? FindNodeAt(int x, int y)
         {
             foreach (var node in tree.Nodes)
             {
@@ -198,7 +198,7 @@ namespace KurseWork_Network
 
         private void Form2Closed(object? sender, EventArgs e) => form2closed = true;
 
-        private void btnOpenForm2_Click(object sender, EventArgs e)
+        private void btnOpenForm2_Click(object? sender, EventArgs e)
         {
             form2 = new Form2();
             form2closed = false;
@@ -212,7 +212,7 @@ namespace KurseWork_Network
         private void LoadDataToForm2()
         {
             // Выбираем начальный узел (можно улучшить выбор через интерфейс)
-            Node startNode = selectedNodes.FirstOrDefault();
+            Node? startNode = selectedNodes.FirstOrDefault();
 
             if (startNode != null)
             {
@@ -225,7 +225,8 @@ namespace KurseWork_Network
                 var routes = solver.GetRoutes();
 
                 // Создаём вторую форму и передаём данные
-                form2.LoadData(distances, routes);
+                if (form2 != null)
+                    form2.LoadData(distances, routes);
             }
         }
     }
