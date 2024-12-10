@@ -11,7 +11,7 @@ namespace KurseWork_Network
         public string Id { get; set; }
         public int X { get; set; }
         public int Y { get; set; }
-        private const int Radius = 15;
+        public readonly int Radius = 15;
 
         public Node(string id, int x, int y)
         {

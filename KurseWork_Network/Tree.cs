@@ -18,7 +18,7 @@ namespace KurseWork_Network
         }
 
         // Добавление ребра
-        public void AddEdge(Node from, Node to, int weight, ChannelType type, int errorProbability = 0)
+        public void AddEdge(Node from, Node to, int weight, ChannelType type, int errorProbability = 4)
         {
             if (Nodes.Contains(from) && Nodes.Contains(to))
             {
@@ -47,6 +47,15 @@ namespace KurseWork_Network
                 node.Draw(g);
             }
         }
+
+        public Edge GetEdge(Node node1, Node node2)
+        {
+            // Предполагаем, что рёбра хранятся в списке Edges
+            return Edges.FirstOrDefault(edge =>
+                (edge.From == node1 && edge.To == node2) ||
+                (edge.From == node2 && edge.To == node1)); // Для неориентированных графов
+        }
+
     }
 
     // Класс рёбра (связи между узлами)
@@ -58,7 +67,7 @@ namespace KurseWork_Network
         public ChannelType Type { get; set; } // Тип канала
         public double ErrorProbability { get; set; } // Вероятность ошибок (0-100%)
 
-        public Edge(Node from, Node to, int weight, ChannelType type, int errorProbability = 0)
+        public Edge(Node from, Node to, int weight, ChannelType type, int errorProbability = 4)
         {
             From = from;
             To = to;

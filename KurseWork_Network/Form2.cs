@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.VisualBasic.Devices;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -7,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using static System.ComponentModel.Design.ObjectSelectorEditor;
 
 namespace KurseWork_Network
 {
@@ -14,6 +16,8 @@ namespace KurseWork_Network
     {
         private DataGridView dgvDistances = new();
         private ListBox lbRoutes = new();
+        private Form1 form1;
+
 
         public Form2()
         {
@@ -23,7 +27,7 @@ namespace KurseWork_Network
             dgvDistances.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             dgvDistances.Location = new System.Drawing.Point(12, 12);
             dgvDistances.Name = "dgvDistances";
-            dgvDistances.Size = new System.Drawing.Size(720, 200);
+            dgvDistances.Size = new System.Drawing.Size(500, 200);
             dgvDistances.TabIndex = 0;
             dgvDistances.Columns.Add("Node", "Узел");
             dgvDistances.Columns.Add("Distance", "Расстояние");
@@ -33,15 +37,21 @@ namespace KurseWork_Network
             dgvDistances.AllowUserToDeleteRows = false;
             dgvDistances.AllowUserToOrderColumns = false;
 
+
             // Настройка ListBox
             lbRoutes.FormattingEnabled = true;
             lbRoutes.Location = new System.Drawing.Point(12, 220);
             lbRoutes.Name = "lbRoutes";
-            lbRoutes.Size = new System.Drawing.Size(720, 200);
+            lbRoutes.Size = new System.Drawing.Size(500, 200);
             lbRoutes.TabIndex = 1;
 
             Controls.Add(dgvDistances);
             Controls.Add(lbRoutes);
+        }
+
+        public void SetForm1(Form1 form1)
+        {
+            this.form1 = form1;
         }
 
         private void Form2_Load(object sender, EventArgs e)
@@ -53,6 +63,7 @@ namespace KurseWork_Network
         public void LoadData(List<(string NodeId, int Distance, int TransitCount)> distances,
                          List<(string NodeId, string Path)> routes)
         {
+
             // Очистка таблицы и списка
             dgvDistances.Rows.Clear();
             lbRoutes.Items.Clear();
@@ -71,5 +82,7 @@ namespace KurseWork_Network
                 lbRoutes.Items.Add($"{NodeId}: {Path}");
             }
         }
+
+
     }
 }

@@ -90,7 +90,7 @@ public class ShortestPathSolver
         {
             if (distances[node] != int.MaxValue)
             {
-                var path = GetPathTo(node);
+                var path = GetPathToString(node);
                 result.Add((node.Id, string.Join(" -> ", path)));
             }
         }
@@ -98,7 +98,7 @@ public class ShortestPathSolver
     }
 
     // Метод для восстановления пути до узла
-    private List<string> GetPathTo(Node targetNode)
+    private List<string> GetPathToString(Node targetNode)
     {
         List<string> path = new List<string>();
         for (Node at = targetNode; at != null; at = previous[at])
@@ -108,4 +108,26 @@ public class ShortestPathSolver
         path.Reverse();
         return path;
     }
+
+    public List<Node> GetPathTo(Node startNode, Node targetNode)
+    {
+        List<Node> path = new List<Node>();
+
+        // Идём по словарю previous от целевого узла к начальному
+        for (Node at = targetNode; at != null; at = previous.ContainsKey(at) ? previous[at] : null)
+        {
+            path.Add(at);
+        }
+
+        // Если маршрут пуст или не начинается с начального узла, значит маршрута нет
+        if (path.Count == 0 || path.Last() != startNode)
+        {
+            return new List<Node>(); // Возвращаем пустой список, если путь недоступен
+        }
+
+        path.Reverse(); // Переворачиваем список, чтобы он шёл от начального узла к целевому
+        return path;
+    }
+
+
 }

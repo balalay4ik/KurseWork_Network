@@ -34,9 +34,8 @@ public class RegionGenerator
                 Node node;
                 do
                 {
-                    int x = regionCenterX + random.Next(-100, 100);
-                    int y = regionCenterY + random.Next(-100, 100);
-                    //node = new Node($"R{region + 1}N{i + 1}", x, y);
+                    int x = regionCenterX + random.Next(-150, 150);
+                    int y = regionCenterY + random.Next(-150, 150);
                     node = new Node($"{region + 1}_{i + 1}", x, y);
                 } while (IsTooCloseToOtherNodes(node, regionNodes, minDistance)); // Проверяем пересечения
                 tree.AddNode(node);
