@@ -5,16 +5,22 @@ using System.Collections.Generic;
 public class ShortestPathSolver
 {
     private Tree graph;
-    private Dictionary<Node, int> distances; // Расстояния от начального узла
-    private Dictionary<Node, Node> previous; // Предыдущий узел в пути
-    private Dictionary<Node, int> transitCount; // Количество транзитных рёбер
+    private Dictionary<Node, int> distances; // Відстані від початкового вузла
+    private Dictionary<Node, Node> previous; // Попередній вузол у шляху
+    private Dictionary<Node, int> transitCount; // Кількість транзитних ребер
 
     public ShortestPathSolver(Tree graph)
     {
         this.graph = graph;
     }
 
-    // Метод для поиска кратчайших путей
+        /// <summary>
+        /// Метод пошуку найкоротших шляхів до всіх вузлів графа з заданого початкового вузла.
+        /// </summary>
+        /// <remarks>
+        /// Метод використовує алгоритм Дейкстри з чергою та пріоритетом.
+        /// </remarks>
+        /// <param name="startNode">Початковий вузол</param>
     public void FindShortestPaths(Node startNode)
     {
         distances = new Dictionary<Node, int>();
@@ -22,7 +28,7 @@ public class ShortestPathSolver
         transitCount = new Dictionary<Node, int>();
         HashSet<Node> visited = new HashSet<Node>();
 
-        // Инициализация расстояний
+        // Ініціалізація відстаней
         foreach (var node in graph.Nodes)
         {
             distances[node] = int.MaxValue;
@@ -33,7 +39,7 @@ public class ShortestPathSolver
         distances[startNode] = 0;
         transitCount[startNode] = 0;
 
-        // Очередь с приоритетом
+        // Черга з пріоритетом
         PriorityQueue<Node, (int, int)> queue = new PriorityQueue<Node, (int, int)>();
         queue.Enqueue(startNode, (0, 0));
 
@@ -71,7 +77,11 @@ public class ShortestPathSolver
         }
     }
 
-    // Получить таблицу расстояний
+
+        /// <summary>
+        /// Отримуємо таблицю відстаней до всіх вузлів від початкового вузла.
+        /// </summary>
+        /// <returns>Список кортежів з ідентифікатором вузла, відстанню до нього та кількістю транзитних ребер</returns>
     public List<(string NodeId, int Distance, int TransitCount)> GetDistanceTable()
     {
         var result = new List<(string NodeId, int Distance, int TransitCount)>();
@@ -82,7 +92,10 @@ public class ShortestPathSolver
         return result;
     }
 
-    // Получить список маршрутов
+        /// <summary>
+        /// Отримуємо список маршрутів до всіх вузлів від початкового вузла.
+        /// </summary>
+        /// <returns>Список кортежів з ідентифікатором вузла та списком вузлів, що представляють маршрут</returns>
     public List<(string NodeId, string Path)> GetRoutes()
     {
         var result = new List<(string NodeId, string Path)>();
@@ -97,7 +110,12 @@ public class ShortestPathSolver
         return result;
     }
 
-    // Метод для восстановления пути до узла
+
+/// <summary>
+/// Формує шлях від початкового вузла до заданого цільового вузла у вигляді списку ідентифікаторів вузлів.
+/// </summary>
+/// <param name="targetNode">Цільовий вузол, до якого формується шлях.</param>
+/// <returns>Список ідентифікаторів вузлів, що представляє шлях до цільового вузла, у зворотному порядку.</returns>
     private List<string> GetPathToString(Node targetNode)
     {
         List<string> path = new List<string>();
@@ -109,23 +127,29 @@ public class ShortestPathSolver
         return path;
     }
 
+/// <summary>
+/// Формує шлях від початкового вузла до цільового вузла у вигляді списку вузлів.
+/// </summary>
+/// <param name="startNode">Початковий вузол, з якого починається шлях.</param>
+/// <param name="targetNode">Цільовий вузол, до якого формується шлях.</param>
+/// <returns>Список вузлів, що представляє шлях від початкового вузла до цільового. Повертає порожній список, якщо шлях недоступний.</returns>
     public List<Node> GetPathTo(Node startNode, Node targetNode)
     {
         List<Node> path = new List<Node>();
 
-        // Идём по словарю previous от целевого узла к начальному
+        // Проходимо по словнику previous від цільового вузла до початкового
         for (Node at = targetNode; at != null; at = previous.ContainsKey(at) ? previous[at] : null)
         {
             path.Add(at);
         }
 
-        // Если маршрут пуст или не начинается с начального узла, значит маршрута нет
+        // Якщо маршрут порожній або не починається з початкового вузла, значить маршруту немає
         if (path.Count == 0 || path.Last() != startNode)
         {
-            return new List<Node>(); // Возвращаем пустой список, если путь недоступен
+            return new List<Node>(); // Повертаємо порожній список, якщо шлях недоступний
         }
 
-        path.Reverse(); // Переворачиваем список, чтобы он шёл от начального узла к целевому
+        path.Reverse(); // Перевертаємо список, щоб він ішов від початкового вузла до цільового
         return path;
     }
 

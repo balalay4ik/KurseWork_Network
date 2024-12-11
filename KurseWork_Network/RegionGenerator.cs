@@ -7,28 +7,35 @@ public class RegionGenerator
     public int[] Weights { get; set; } = { 3, 5, 7, 8, 11, 12, 15, 18, 21, 25 };
     private Random random = new Random();
 
-    // Метод для генерации дерева
+   
+        /// <summary>
+        /// Генерація дерева з заданою кількістю регіонів, вузлів в кожному регіоні та мінімальним відстанем між вузлами.
+        /// </summary>
+        /// <param name="regionCount">Кількість регіонів</param>
+        /// <param name="nodesPerRegion">Кількість вузлів в кожному регіоні</param>
+        /// <param name="minDistance">Мінімальна відстань між вузлами</param>
+        /// <returns>Сгенероване дерево</returns>
     public Tree Generate(int regionCount, int nodesPerRegion, int minDistance)
     {
-        Tree tree = new Tree(); // Создаём дерево для хранения данных
-        List<List<Node>> allRegions = new List<List<Node>>(); // Хранение всех узлов по регионам
+        Tree tree = new Tree(); // Створюємо дерево для зберігання даних
+        List<List<Node>> allRegions = new List<List<Node>>(); // Зберігання всіх вузлів за регіонами
 
-        int centerX = 400; // Центр всей структуры по X
-        int centerY = 400; // Центр всей структуры по Y
-        int globalRadius = 300; // Радиус для расположения регионов
-        double angleStep = 2 * Math.PI / regionCount; // Угол между регионами
+        int centerX = 400; // Центр всієї структури за X
+        int centerY = 400; // Центр всієї структури за Y
+        int globalRadius = 300; // Радіус для розташування регіонів
+        double angleStep = 2 * Math.PI / regionCount; // Кут між регіонами
 
-        // Генерация регионов
+        // Генерація регіонів
         for (int region = 0; region < regionCount; region++)
         {
-            // Вычисляем центр региона
+            // Розрахунок центру регіону
             double angle = region * angleStep;
             int regionCenterX = centerX + (int)(globalRadius * Math.Cos(angle));
             int regionCenterY = centerY + (int)(globalRadius * Math.Sin(angle));
 
-            List<Node> regionNodes = new List<Node>(); // Узлы текущего региона
+            List<Node> regionNodes = new List<Node>(); // Вузли поточного регіону
 
-            // Генерация узлов внутри региона
+            // Генерація вузлів всередині регіону
             for (int i = 0; i < nodesPerRegion; i++)
             {
                 Node node;
@@ -37,24 +44,31 @@ public class RegionGenerator
                     int x = regionCenterX + random.Next(-150, 150);
                     int y = regionCenterY + random.Next(-150, 150);
                     node = new Node($"{region + 1}_{i + 1}", x, y);
-                } while (IsTooCloseToOtherNodes(node, regionNodes, minDistance)); // Проверяем пересечения
+                } while (IsTooCloseToOtherNodes(node, regionNodes, minDistance)); // Перевірка на перетину
                 tree.AddNode(node);
                 regionNodes.Add(node);
             }
 
-            // Соединение узлов внутри региона
+            // Сполучення вузлів всередині регіону
             ConnectNodesWithinRegion(tree, regionNodes);
 
-            allRegions.Add(regionNodes); // Сохраняем узлы региона
+            allRegions.Add(regionNodes); // Зберігання вузлів регіону
         }
 
-        // Соединение регионов
+        // Сполучення регіонів
         ConnectRegions(tree, allRegions);
 
         return tree;
     }
 
-    // Проверка минимального расстояния между узлами
+
+        /// <summary>
+        /// Перевірка на те, чи є новий вузол надто близько до інших вузлів.
+        /// </summary>
+        /// <param name="newNode">Новий вузол</param>
+        /// <param name="nodes">Вузли, які вже є в регіоні</param>
+        /// <param name="minDistance">Мінімальна відстань між вузлами</param>
+        /// <returns>True, якщо новий вузол надто близько до інших вузлів, інакше - False</returns>
     private bool IsTooCloseToOtherNodes(Node newNode, List<Node> nodes, int minDistance)
     {
         foreach (var node in nodes)
@@ -67,7 +81,12 @@ public class RegionGenerator
         return false;
     }
 
-    // Соединение узлов внутри региона
+
+        /// <summary>
+        /// Сполучення вузлів всередині регіону. Мета - отримати граф з приблизно 3.5 ребрами на вузол.
+        /// </summary>
+        /// <param name="tree">Дерево, до якого додаються ребра</param>
+        /// <param name="nodes">Вузли, які сполучаються</param>
     private void ConnectNodesWithinRegion(Tree tree, List<Node> nodes)
     {
         int nodeCount = nodes.Count;
@@ -76,19 +95,19 @@ public class RegionGenerator
 
         Random random = new Random();
 
-        // Перебираем пары узлов
+        // Перебiраємо пари вузлiв
         for (int i = 0; i < nodeCount; i++)
         {
             for (int j = i + 1; j < nodeCount; j++)
             {
-                // Проверяем, нужно ли добавлять ребро, чтобы достичь целевого количества
+                // Перевiряємо, чи потрібно додавати ребро, щоб досягти цільового кiлькiстi
                 if (currentEdgeCount < targetEdgeCount && random.NextDouble() < 0.5)
                 {
-                    int weight = GetRandomWeight(); // Случайный вес рёбра
+                    int weight = GetRandomWeight(); // Випадковий вiс рiбра
                     tree.AddEdge(nodes[i], nodes[j], weight, ChannelType.Duplex);
                     currentEdgeCount++;
 
-                    // Прерываем цикл, если достигли цели
+                    // Прериваємо цикл, якщо досягли цiлi
                     if (currentEdgeCount >= targetEdgeCount)
                     {
                         return;
@@ -98,16 +117,24 @@ public class RegionGenerator
         }
     }
 
+        /// <summary>
+        /// Повертає випадковий вiс рiбра. Вiс рiбра випадково вибирається з масиву Weights.
+        /// </summary>
+        /// <returns>Випадковий вiс рiбра</returns>
     public int GetRandomWeight()
     {
         return Weights[random.Next(Weights.Length)];
     }
 
 
-    // Соединение регионов одной связью
+        /// <summary>
+        /// Сполучення регіонів між собою. Мета - отримати зв'язок між регіонами, виключаючи вже використані вузли.
+        /// </summary>
+        /// <param name="tree">Дерево, до якого додаються ребра</param>
+        /// <param name="regions">Список регіонів, які сполучаються</param>
     private void ConnectRegions(Tree tree, List<List<Node>> regions)
     {
-        HashSet<Node> usedNodes = new HashSet<Node>(); // Узлы, уже связанные с другими регионами
+        HashSet<Node> usedNodes = new HashSet<Node>(); // Вузли, вже зв'язані з іншими регіонами
 
         for (int i = 0; i < regions.Count - 1; i++)
         {
@@ -115,14 +142,14 @@ public class RegionGenerator
             Node? toNode = null;
             double minDistance = double.MaxValue;
 
-            // Находим ближайшие узлы между регионами, исключая уже использованные
+            // Знаходимо найближчі вузли між регіонами, виключаючи вже використані
             foreach (var nodeA in regions[i])
             {
-                if (usedNodes.Contains(nodeA)) continue; // Пропускаем уже использованные узлы
+                if (usedNodes.Contains(nodeA)) continue; // Пропускаємо вже використані вузли
 
                 foreach (var nodeB in regions[i + 1])
                 {
-                    if (usedNodes.Contains(nodeB)) continue; // Пропускаем уже использованные узлы
+                    if (usedNodes.Contains(nodeB)) continue; // Пропускаємо вже використані вузли
 
                     double distance = CalculateDistance(nodeA, nodeB);
                     if (distance < minDistance)
@@ -134,19 +161,19 @@ public class RegionGenerator
                 }
             }
 
-            // Создаём связь, если нашли подходящие узлы
+            // Створюємо зв'язок, якщо знайшли придатні вузли
             if (fromNode != null && toNode != null)
             {
                 int weight = GetRandomWeight();
                 tree.AddEdge(fromNode, toNode, weight, ChannelType.Duplex);
 
-                // Отмечаем узлы как использованные
+                // Маруємо вузли як використані
                 usedNodes.Add(fromNode);
                 usedNodes.Add(toNode);
             }
         }
 
-        // Опционально: замыкание в кольцо
+        // Опціяльно: замикання в кільце
         if (regions.Count > 2)
         {
             Node? fromNode = null;
@@ -182,7 +209,12 @@ public class RegionGenerator
     }
 
 
-    // Метод для вычисления расстояния между узлами
+    /// <summary>
+    /// Обчислює відстань між двома вузлами на площині.
+    /// </summary>
+    /// <param name="nodeA">Перший вузол</param>
+    /// <param name="nodeB">Другий вузол</param>
+    /// <returns>Відстань між вузлами або 0, якщо один з вузлів є null</returns>
     private double CalculateDistance(Node nodeA, Node nodeB)
     {
         if(nodeA == null || nodeB == null) return 0;

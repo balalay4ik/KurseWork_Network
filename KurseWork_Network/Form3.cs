@@ -7,17 +7,18 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using ClosedXML.Excel;
 
 namespace KurseWork_Network
 {
     public partial class Form3 : Form
     {
-        private Form1 form1; // Ссылка на Form1
-        private DataGridView dgvPackets;
-        private NumericUpDown nudMessageSize, nudPacketSize, nudServiceInfoSize;
-        private Button btnAnalyze;
-        private ComboBox cbProtocol;
-        private Label lblStartNode, lblEndNode;
+        private Form1 form1; // Посилання на Form1
+        private DataGridView dgvPackets; // Таблиця для відображення пакетів
+        private NumericUpDown nudMessageSize, nudPacketSize, nudServiceInfoSize; // Поля для введення розміру повідомлення, пакета та службової інформації
+        private Button btnAnalyze; // Кнопка для запуску аналізу
+        private ComboBox cbProtocol; // Вибір протоколу
+        private Label lblStartNode, lblEndNode; // Мітки для відображення стартової та кінцевої ноди
 
 
         public Form3(Form1 form1)
@@ -25,25 +26,25 @@ namespace KurseWork_Network
             this.form1 = form1;
             InitializeComponent();
 
-            // Таблица для отображения переданных пакетов
+            // Таблиця для відображення переданих пакетів
             dgvPackets = new DataGridView
             {
                 Location = new System.Drawing.Point(12, 12),
-                Size = new System.Drawing.Size(700, 300),
+                Size = new System.Drawing.Size(743, 300),
                 ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize,
                 ReadOnly = true,
                 AllowUserToAddRows = false,
                 AllowUserToDeleteRows = false,
             };
 
-            // Добавление столбцов
-            dgvPackets.Columns.Add("PacketNumber", "Номер пакета");
-            dgvPackets.Columns.Add("PacketSize", "Размер пакета (байт)");
+            // Додавання стовпців
+            dgvPackets.Columns.Add("PacketNumber", "Номер пакету");
+            dgvPackets.Columns.Add("PacketSize", "Розмір пакету (байт)");
             dgvPackets.Columns.Add("Protocol", "Протокол");
-            dgvPackets.Columns.Add("ServiceInfoSize", "Служебная информация (байт)");
-            dgvPackets.Columns.Add("TimeSpent", "Затраченное время (мс)");
-            dgvPackets.Columns.Add("TotalDelivered", "Всего доставлено (байт)");
-            dgvPackets.Columns.Add("PacketStatus", "Статус пакета");
+            dgvPackets.Columns.Add("ServiceInfoSize", "Службова інформація (байт)");
+            dgvPackets.Columns.Add("TimeSpent", "Затрачений час (мс)");
+            dgvPackets.Columns.Add("TotalDelivered", "Всього доставлено (байт)");
+            dgvPackets.Columns.Add("PacketStatus", "Статус пакету");
 
 
             // Поля для настройки
@@ -58,7 +59,7 @@ namespace KurseWork_Network
             };
             Label lblMessageSize = new Label
             {
-                Text = "Размер сообщения (байт):",
+                Text = "Розмір повідомлення (байт):",
                 Location = new System.Drawing.Point(12, 310),
                 Size = new System.Drawing.Size(200, 20)
             };
@@ -74,7 +75,7 @@ namespace KurseWork_Network
             };
             Label lblPacketSize = new Label
             {
-                Text = "Размер пакета (байт):",
+                Text = "Розмір пакету (байт):",
                 Location = new System.Drawing.Point(12, 360),
                 Size = new System.Drawing.Size(200, 20)
             };
@@ -90,21 +91,21 @@ namespace KurseWork_Network
             };
             Label lblServiceInfoSize = new Label
             {
-                Text = "Служебная информация (байт):",
+                Text = "Службова інформація (байт):",
                 Location = new System.Drawing.Point(12, 410),
                 Size = new System.Drawing.Size(200, 20)
             };
 
-            // Кнопка для запуска анализа
+            // Кнопка для запуску аналізу
             btnAnalyze = new Button
             {
-                Text = "Запустить анализ",
+                Text = "Запустити аналіз",
                 Location = new System.Drawing.Point(12, 470),
                 Size = new System.Drawing.Size(150, 30)
             };
             btnAnalyze.Click += BtnAnalyze_Click;
 
-            // Выбор протокола
+            // Вибір протоколу
             cbProtocol = new ComboBox
             {
                 Location = new System.Drawing.Point(430, 330),
@@ -114,10 +115,10 @@ namespace KurseWork_Network
             cbProtocol.Items.AddRange(new string[] { "TCP", "UDP" });
             cbProtocol.SelectedIndex = 0; // По умолчанию TCP
 
-            // Обозначение стартовой ноды
+            // Обозначення стартової ноди
             lblStartNode = new Label
             {
-                Text = "Стартовая нода: None",
+                Text = "Стартова нода: None",
                 Location = new System.Drawing.Point(430, 355),
                 Size = new System.Drawing.Size(200, 20),
                 Font = new Font("Arial", 10, FontStyle.Bold),
@@ -125,10 +126,10 @@ namespace KurseWork_Network
             };
             Controls.Add(lblStartNode);
 
-            // Обозначение конечной ноды
+            // Обозначення кінцевої ноди
             lblEndNode = new Label
             {
-                Text = "Конечная нода: None",
+                Text = "Кінцева нода: None",
                 Location = new System.Drawing.Point(430, 380),
                 Size = new System.Drawing.Size(200, 20),
                 Font = new Font("Arial", 10, FontStyle.Bold),
@@ -136,8 +137,16 @@ namespace KurseWork_Network
             };
             Controls.Add(lblEndNode);
 
+            Button btnSaveToExcel = new Button
+            {
+                Text = "Зберегти в Excel",
+                Location = new System.Drawing.Point(180, 470),
+                Size = new System.Drawing.Size(150, 30)
+            };
+            btnSaveToExcel.Click += BtnSaveToExcel_Click;
+            Controls.Add(btnSaveToExcel);
 
-            // Добавляем элементы на форму
+            // Додавання елементів на форму
             Controls.Add(dgvPackets);
             Controls.Add(lblMessageSize);
             Controls.Add(nudMessageSize);
@@ -148,9 +157,9 @@ namespace KurseWork_Network
             Controls.Add(btnAnalyze);
             Controls.Add(cbProtocol);
 
-            // Настройки формы
-            Text = "Анализ сети";
-            Size = new System.Drawing.Size(760, 550);
+            // Налаштування форми
+            Text = "Аналіз мережі";
+            Size = new System.Drawing.Size(780, 550);
         }
 
         private void Form3_Load(object sender, EventArgs e)
@@ -158,27 +167,35 @@ namespace KurseWork_Network
 
         }
 
-        // Обработчик кнопки анализа
+
+        /// <summary>
+        /// Метод-обробник натискання кнопки "Аналіз"
+        /// </summary>
+        /// <param name="sender">Джерело події</param>
+        /// <param name="e">Параметри події</param>
+        /// <remarks>
+        /// Метод аналізує трафік в мережі, використовуючи вибраний протокол,
+        /// і виводить результати в таблицю.
         private void BtnAnalyze_Click(object? sender, EventArgs e)
         {
             if (form1 == null || form1.tree == null)
             {
-                MessageBox.Show("Сеть не найдена!");
+                MessageBox.Show("Сеть не знайдена!");
                 return;
             }
 
-            // Получаем параметры
+            // Отримуємо параметри
             int messageSize = (int)nudMessageSize.Value;
             int packetSize = (int)nudPacketSize.Value;
             int serviceInfoSize = (int)nudServiceInfoSize.Value;
             string protocol = cbProtocol.SelectedItem.ToString();
 
-            // Полезная нагрузка в одном пакете
+            // Корисний вантаж в одному пакеті
             int payloadSize = packetSize - serviceInfoSize;
 
             if (payloadSize <= 0)
             {
-                MessageBox.Show("Размер служебной информации превышает или равен размеру пакета!");
+                MessageBox.Show("Розмiр службової інформації перевищує або дорiвнює розмiру пакета!");
                 return;
             }
 
@@ -211,9 +228,13 @@ namespace KurseWork_Network
                     totalDelivered += currentPacketPayload;
                     isFirstConnection = false;
                 }
-                else
+                else if (protocol == "TCP")
                 {
                     i--;
+                }
+                else if (protocol == "UDP")
+                {
+                    totalDelivered += currentPacketPayload;
                 }
 
                 totalTimeSpent += timeSpent.totalTime;
@@ -222,17 +243,71 @@ namespace KurseWork_Network
             }
         }
 
+        /// <summary>
+        /// Оновлює текстові мітки початкового та кінцевого вузлів на основі
+        /// заданих параметрів.
+        /// </summary>
+        /// <param name="startNode">Початковий вузол.</param>
+        /// <param name="endNode">Кінцевий вузол.</param>
         public void UpdateNodeLabels(Node startNode, Node endNode)
         {
             if (startNode != null)
             {
-                lblStartNode.Text = $"Стартовая нода: {startNode?.Id ?? "None"}";
-                lblEndNode.Text = $"Конечная нода: {endNode?.Id ?? "None"}";
+                lblStartNode.Text = $"Початковий вузол: {startNode?.Id ?? "None"}";
+                lblEndNode.Text = $"Кінцевий вузол: {endNode?.Id ?? "None"}";
             }
             else
             {
-                lblStartNode.Text = $"Стартовая нода: None";
-                lblEndNode.Text = $"Конечная нода: None";
+                lblStartNode.Text = $"Початковий вузол: None";
+                lblEndNode.Text = $"Кінцевий вузол: None";
+            }
+        }
+
+        /// <summary>
+        /// Експортує дані з DataGridView до Excel файлу.
+        /// </summary>
+        /// <param name="sender">Джерело події.</param>
+        /// <param name="e">Параметри події.</param>
+        ///
+        private void BtnSaveToExcel_Click(object sender, EventArgs e)
+        {
+            if (dgvPackets.Rows.Count == 0)
+            {
+                MessageBox.Show("Таблиця порожня. Немає чого експортувати.");
+                return;
+            }
+
+            using (var workbook = new XLWorkbook())
+            {
+                var worksheet = workbook.Worksheets.Add("Таблиця");
+
+                // Заголовки стовпців
+                for (int i = 0; i < dgvPackets.Columns.Count; i++)
+                {
+                    worksheet.Cell(1, i + 1).Value = dgvPackets.Columns[i].HeaderText;
+                }
+
+                // Дані таблиці
+                for (int i = 0; i < dgvPackets.Rows.Count; i++)
+                {
+                    for (int j = 0; j < dgvPackets.Columns.Count; j++)
+                    {
+                        worksheet.Cell(i + 2, j + 1).Value = dgvPackets.Rows[i].Cells[j].Value?.ToString();
+                    }
+                }
+
+                // Збереження файлу
+                SaveFileDialog saveFileDialog = new SaveFileDialog
+                {
+                    Filter = "Excel файли (*.xlsx)|*.xlsx",
+                    Title = "Зберегти як Excel файл"
+                };
+
+                if (saveFileDialog.ShowDialog() == DialogResult.OK)
+                {
+                    workbook.SaveAs(saveFileDialog.FileName);
+                    MessageBox.Show("Таблиця успішно збережена в Excel файл.");
+                }
             }
         }
     }

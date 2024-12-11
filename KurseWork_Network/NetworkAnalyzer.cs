@@ -14,87 +14,82 @@ public class NetworkAnalyzer
         this.network = network;
     }
 
-    public double AnalyzeTraffic(
-        Node startNode,
-        Node endNode,
-        int messageSize,
-        int packetSize,
-        int serviceInfoSize,
-        bool isVirtualChannel
-    )
-    {
-        ShortestPathSolver solver = new ShortestPathSolver(network);
-        solver.FindShortestPaths(startNode);
-        var distances = solver.GetDistanceTable()
-            .ToDictionary(item => network.Nodes.First(n => n.Id == item.NodeId), item => item.Distance);
-
-        if (!distances.ContainsKey(endNode) || distances[endNode] == int.MaxValue)
-        {
-            MessageBox.Show("Нет маршрута к конечной ноде!");
-            return 0;
-        }
-
-        double routeDistance = distances[endNode];
-        //int packetCount = (int)Math.Ceiling((double)messageSize / packetSize);
-        //int servicePackets = isVirtualChannel ? 2 : packetCount;
-
-        //double totalTraffic = routeDistance * (packetCount * packetSize + servicePackets * serviceInfoSize);
-        return routeDistance;
-    }
-
+        /// <summary>
+        /// Метод для аналізу трафіку в мережі з врахуванням помилок.
+        /// </summary>
+        /// <param name="startNode">Початковий вузол.</param>
+        /// <param name="endNode">Кінцевий вузол.</param>
+        /// <param name="isFirstConnection"> TRUE, якщо це перший зв'язок. </param>
+        /// <returns>
+        /// Пару з часом (у мілісекундах) та статусом (Ok або Error).
+        /// </returns>
+        /// <remarks>
+        /// Метод аналізує трафік від початкового вузлу до кінцевого,
+        /// враховуючи помилки на маршруті. Якщо помилка є, то повертається
+        /// час до помилки та статус Error. Якщо помилки немає, то повертається
+        /// загальний час на повний маршрут та статус Ok.
+        /// </remarks>
     public (double totalTime, Status status) AnalyzeTraffic(Node startNode, Node endNode, bool isFirstConnection = false)
     {
         double totalTime = 0;
 
         var route = GetRoute(startNode, endNode);
 
-        // Время на установление соединения (учитывается только для первого соединения)
+        // Час на встановлення з'єднання (враховується тільки для першого з'єднання)
         if (isFirstConnection)
         {
-            totalTime += route.Sum(edge => edge.Weight) * 2; // Время для 2 пакетов на установление соединения
+            totalTime += route.Sum(edge => edge.Weight) * 2; // Час для 2 пакетів на встановлення з'єднання
         }
 
-        // Проверка на ошибки
+        // Перевірка на помилки
         Edge errorEdge = CalculateRouteErrorEdge(route);
 
         if (errorEdge == null)
         {
-            // Если ошибки нет, добавляем время на полный маршрут
+            // Якщо помилки немає, додаємо час на повний маршрут
             totalTime += route.Sum(edge => edge.Weight);
             return (totalTime, Status.Ok);  
         }
 
-        // Если ошибка есть, считаем время до рёбра с ошибкой
+        // Якщо помилка є, рахуємо час до ребра з помилкою
         foreach (var edge in route)
         {
             totalTime += edge.Weight;
 
             if (edge == errorEdge)
             {
-                return (totalTime, Status.Error); // Возвращаем время до ошибки и статус
+                return (totalTime, Status.Error); // Повертаємо час до помилки та статус
             }
         }
 
-        return (totalTime, Status.Error); // На всякий случай
+        return (totalTime, Status.Error);
     }
 
+        /// <summary>
+        /// Отримуємо кратчайший маршрут між startNode та endNode.
+        /// </summary>
+        /// <param name="startNode">Початковий вузол</param>
+        /// <param name="endNode">Кінцевий вузол</param>
+        /// <returns>Список ребер - кратчайший маршрут між startNode та endNode</returns>
+        /// <exception cref="Exception">Маршрут не знайдено!</exception>
+        /// <exception cref="Exception">Ребро между вузлами {path[i].Id} и {path[i + 1].Id} не знайдено!</exception>
     private List<Edge> GetRoute(Node startNode, Node endNode)
     {
-        // Создаём экземпляр алгоритма Дейкстры
+        // Створimo екземпляр алгоритму Дейкстри
         ShortestPathSolver shortestPathSolver = new ShortestPathSolver(network);
 
-        // Выполняем поиск кратчайших путей от startNode
+        // Виконуємо пошук кратчайших шляхiв о startNode
         shortestPathSolver.FindShortestPaths(startNode);
 
-        // Получаем путь как список узлов
+        // Отримуємо шлях як список вузлів
         var path = shortestPathSolver.GetPathTo(startNode, endNode);
 
         if (path == null || path.Count < 2)
         {
-            throw new Exception("Маршрут не найден!");
+            throw new Exception("Маршрут не знайдено!");
         }
 
-        // Преобразуем путь (список узлов) в список рёбер
+        // Перетворюємо шлях (список вузлів) у список ребер
         List<Edge> route = new List<Edge>();
         for (int i = 0; i < path.Count - 1; i++)
         {
@@ -105,7 +100,7 @@ public class NetworkAnalyzer
             }
             else
             {
-                throw new Exception($"Ребро между узлами {path[i].Id} и {path[i + 1].Id} не найдено!");
+                throw new Exception($"Ребро между вузлами {path[i].Id} и {path[i + 1].Id} не знайдено!");
             }
         }
 
@@ -113,21 +108,31 @@ public class NetworkAnalyzer
     }
 
 
+    /// <summary>
+    /// Обчислює рiвiнь помилки на маршруті.
+    /// </summary>
+    /// <param name="route">Список рiвiв, що представляє маршрут.</param>
+    /// <returns>Повертає рiвo, де сталася помилка, або null, якщо помилки не було.</returns>
+    /// <remarks>
+    /// Метод генерує випадкове число для кожного ребра в маршруті та перевіряє, 
+    /// чи трапилася помилка на цьому ребрі відповідно до заданої ймовірності помилки.
+    /// </remarks>
     private Edge CalculateRouteErrorEdge(List<Edge> route)
     {
         Random random = new Random();
 
         foreach (var edge in route)
         {
-            // Сравниваем вероятность ошибки на рёбре
+            //  пор в неймання помилки на р брі
             if (random.NextDouble() < edge.ErrorProbability / 100.0)
             {
-                return edge; // Возвращаем ребро, где произошла ошибка
+                return edge; //  повернення р бра, де сталас  помилка
             }
         }
 
-        return null; // Если ошибки не произошло
+        return null; // Якщо помилки не сталас 
     }
+
 }
 
 public enum Status

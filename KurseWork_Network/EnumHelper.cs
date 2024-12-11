@@ -7,8 +7,8 @@ using System.Reflection;
 public static class EnumHelper
 {
     /// <summary>
-    /// Получить описание элемента enum через атрибут Description.
-    /// Если атрибут отсутствует, возвращает строковое имя элемента.
+    /// Отримати опис елемента enum через атрибут Description.
+    /// Якщо атрибут відсутній, повертає строкову назву елемента.
     /// </summary>
     public static string GetDescription<TEnum>(TEnum value) where TEnum : Enum
     {
@@ -18,8 +18,8 @@ public static class EnumHelper
     }
 
     /// <summary>
-    /// Создать словарь Enum -> Описание (с использованием атрибута Description).
-    /// Если атрибут отсутствует, используется форматированное имя.
+    /// Створити словник Enum -> Опис (з використанням атрибуту Description).
+    /// Якщо атрибут відсутній, використовується форматоване ім'я.
     /// </summary>
     public static Dictionary<TEnum, string> GetDescriptions<TEnum>() where TEnum : Enum
     {
@@ -32,7 +32,7 @@ public static class EnumHelper
     }
 
     /// <summary>
-    /// Создать словарь Enum -> Текстовое представление (без атрибутов).
+    /// Створити словник Enum -> Текстове представлення (без атрибутів).
     /// </summary>
     public static Dictionary<TEnum, string> GetEnumTextMappings<TEnum>() where TEnum : Enum
     {
@@ -45,10 +45,11 @@ public static class EnumHelper
     }
 
     /// <summary>
-    /// Форматировать имя элемента enum для удобочитаемого отображения.
+    /// Форматувати ім'я елемента enum для зручного відображення.
     /// </summary>
     private static string FormatEnumName(string name)
     {
         return string.Concat(name.Select((c, i) => i > 0 && char.IsUpper(c) ? " " + c : c.ToString()));
     }
 }
+

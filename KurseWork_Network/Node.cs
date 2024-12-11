@@ -20,20 +20,17 @@ namespace KurseWork_Network
             Y = y;
         }
 
+        /// <summary>
+        /// Малює узел на графіку
+        /// </summary>
+        /// <param name="g"> - об'єкт для малювання</param>
         public void Draw(Graphics g)
         {
-            // Рисуем круг для узла
+            //   круг для вузла
             g.FillEllipse(Brushes.LightBlue, X - Radius, Y - Radius, Radius * 2, Radius * 2);
 
-            // Рисуем текст внутри узла (идентификатор)
+            //   текст усередині вузла (ідентифікатор)
             g.DrawString(Id, new Font("Arial", 10), Brushes.Black, X - 12, Y - 10);
-        }
-
-        public bool IsPointInside(int x, int y)
-        {
-            int dx = X - x;
-            int dy = Y - y;
-            return Math.Sqrt(dx * dx + dy * dy) <= Radius;
         }
     }
 }

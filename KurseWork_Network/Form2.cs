@@ -14,31 +14,31 @@ namespace KurseWork_Network
 {
     public partial class Form2 : Form
     {
-        private DataGridView dgvDistances = new();
-        private ListBox lbRoutes = new();
-        private Form1 form1;
+        
+        private DataGridView dgvDistances = new(); // DataGridView для відображення відстаней між вузлами.
+        private ListBox lbRoutes = new(); // ListBox для відображення маршрутів.     
+        private Form1 form1; // Посилання на Form1, necessary for data exchange.
 
 
         public Form2()
         {
             InitializeComponent();
 
-            // Настройка DataGridView
+            // Налаштування DataGridView
             dgvDistances.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             dgvDistances.Location = new System.Drawing.Point(12, 12);
             dgvDistances.Name = "dgvDistances";
             dgvDistances.Size = new System.Drawing.Size(500, 200);
             dgvDistances.TabIndex = 0;
-            dgvDistances.Columns.Add("Node", "Узел");
-            dgvDistances.Columns.Add("Distance", "Расстояние");
-            dgvDistances.Columns.Add("Transit", "Транзиты");
+            dgvDistances.Columns.Add("Node", "Вузол");
+            dgvDistances.Columns.Add("Distance", "Відстань");
+            dgvDistances.Columns.Add("Transit", "Транзити");
             dgvDistances.ReadOnly = true;
             dgvDistances.AllowUserToAddRows = false;
             dgvDistances.AllowUserToDeleteRows = false;
             dgvDistances.AllowUserToOrderColumns = false;
 
-
-            // Настройка ListBox
+            // Налаштування ListBox
             lbRoutes.FormattingEnabled = true;
             lbRoutes.Location = new System.Drawing.Point(12, 220);
             lbRoutes.Name = "lbRoutes";
@@ -60,23 +60,29 @@ namespace KurseWork_Network
 
         }
 
+        /// <summary>
+        /// Завантажує дані до форми. Очищає таблицю відстаней та список маршрутів,
+        /// а потім заповнює їх новими даними.
+        /// </summary>
+        /// <param name="distances">Таблиця відстаней. Елемент - трійка (Id вузла, відстань, к-ть транзитів)</param>
+        /// <param name="routes">Список маршрутів. Елемент - пара (Id вузла, маршрут)</param>
         public void LoadData(List<(string NodeId, int Distance, int TransitCount)> distances,
                          List<(string NodeId, string Path)> routes)
         {
 
-            // Очистка таблицы и списка
+            // Очищення таблиці та списку
             dgvDistances.Rows.Clear();
             lbRoutes.Items.Clear();
 
-            // Заполнение таблицы расстояний
+            // Заповнення таблиці відстаней
             foreach (var (NodeId, Distance, TransitCount) in distances)
             {
                 dgvDistances.Rows.Add(NodeId,
-                                      Distance == int.MaxValue ? "∞" : Distance.ToString(),
+                                      Distance == int.MaxValue ? " " : Distance.ToString(),
                                       TransitCount == int.MaxValue ? "-" : TransitCount.ToString());
             }
 
-            // Заполнение списка маршрутов
+            // Заповнення списку маршрути
             foreach (var (NodeId, Path) in routes)
             {
                 lbRoutes.Items.Add($"{NodeId}: {Path}");
