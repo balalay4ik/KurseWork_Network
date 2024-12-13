@@ -7,6 +7,12 @@ using System.Threading.Tasks;
 
 public class NetworkAnalyzer
 {
+    public static Dictionary<string, int> ProtocolsInfoSize = new Dictionary<string, int>
+        {
+            { "TCP", 40 },
+            { "UDP", 28 }
+        };
+
     private Tree network;
 
     public NetworkAnalyzer(Tree network)
@@ -86,7 +92,8 @@ public class NetworkAnalyzer
 
         if (path == null || path.Count < 2)
         {
-            throw new Exception("Маршрут не знайдено!");
+            MessageBox.Show("Маршрут не знайдено!");
+            return new List<Edge>();
         }
 
         // Перетворюємо шлях (список вузлів) у список ребер
@@ -100,7 +107,8 @@ public class NetworkAnalyzer
             }
             else
             {
-                throw new Exception($"Ребро между вузлами {path[i].Id} и {path[i + 1].Id} не знайдено!");
+                MessageBox.Show($"Ребро між вузлами {path[i].Id} и {path[i + 1].Id} не знайдено!");
+                return new List<Edge>();
             }
         }
 

@@ -59,6 +59,7 @@ namespace KurseWork_Network
             numericRegions.Location = new Point(605, 30);
             numericRegions.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             numericRegions.Value = 3;
+            numericRegions.Maximum = 100000;
             numericCommunication.Location = new Point(605, 80);
             numericCommunication.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             numericCommunication.Value = 9;

@@ -114,6 +114,7 @@ namespace KurseWork_Network
             };
             cbProtocol.Items.AddRange(new string[] { "TCP", "UDP" });
             cbProtocol.SelectedIndex = 0; // По умолчанию TCP
+            cbProtocol.SelectedIndexChanged += cbProtocol_SelectedIndexChanged;
 
             // Обозначення стартової ноди
             lblStartNode = new Label
@@ -157,14 +158,34 @@ namespace KurseWork_Network
             Controls.Add(btnAnalyze);
             Controls.Add(cbProtocol);
 
+            Button btnComplexAnalyze = new Button
+            {
+                Text = "Комплексний аналіз",
+                Location = new System.Drawing.Point(350, 470),
+                Size = new System.Drawing.Size(150, 30)
+            };
+            btnComplexAnalyze.Click += BtnComplexAnalyze_Click;
+            Controls.Add(btnComplexAnalyze);
+
             // Налаштування форми
             Text = "Аналіз мережі";
             Size = new System.Drawing.Size(780, 550);
+
+            string selectedItem = cbProtocol.SelectedItem.ToString();
+            nudServiceInfoSize.Value = NetworkAnalyzer.ProtocolsInfoSize[selectedItem];
         }
 
         private void Form3_Load(object sender, EventArgs e)
         {
 
+        }
+
+        private void cbProtocol_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            // Получение выбранного элемента
+            string selectedItem = cbProtocol.SelectedItem.ToString();
+
+            nudServiceInfoSize.Value = NetworkAnalyzer.ProtocolsInfoSize[selectedItem];
         }
 
 
@@ -180,7 +201,7 @@ namespace KurseWork_Network
         {
             if (form1 == null || form1.tree == null)
             {
-                MessageBox.Show("Сеть не знайдена!");
+                MessageBox.Show("Мережа не знайдена!");
                 return;
             }
 
@@ -199,12 +220,19 @@ namespace KurseWork_Network
                 return;
             }
 
+            if(form1.selectedNodes.Count < 2)
+            {
+                MessageBox.Show("Виберiть хоча б два вузли!");
+                return;
+            }
+
             NetworkAnalyzer analyzer = new NetworkAnalyzer(form1.tree);
 
             dgvPackets.Rows.Clear();
 
             int totalDelivered = 0;
             double totalTimeSpent = 0;
+            double totalserviceInfoSize = 0;
             bool isFirstConnection = true;
 
             int packetCount = (int)Math.Ceiling((double)messageSize / payloadSize);
@@ -216,16 +244,22 @@ namespace KurseWork_Network
                 // Затраченное время зависит от протокола
                 var timeSpent = protocol == "TCP"
                     ? analyzer.AnalyzeTraffic(
-                        form1.tree.Nodes.First(),
-                        form1.tree.Nodes.Last(),
+                        form1.selectedNodes.First(),
+                        form1.selectedNodes.Last(),
                         isFirstConnection)
                     : analyzer.AnalyzeTraffic(
-                        form1.tree.Nodes.First(),
-                        form1.tree.Nodes.Last());
+                        form1.selectedNodes.First(),
+                        form1.selectedNodes.Last());
 
                 if (timeSpent.status == Status.Ok)
                 {
                     totalDelivered += currentPacketPayload;
+                    totalserviceInfoSize += serviceInfoSize;
+
+                    if(protocol == "TCP" && isFirstConnection)
+                    {
+                        totalserviceInfoSize += NetworkAnalyzer.ProtocolsInfoSize[protocol] * 2;
+                    }
                     isFirstConnection = false;
                 }
                 else if (protocol == "TCP")
@@ -235,21 +269,102 @@ namespace KurseWork_Network
                 else if (protocol == "UDP")
                 {
                     totalDelivered += currentPacketPayload;
+                    totalserviceInfoSize += serviceInfoSize;
                 }
 
                 totalTimeSpent += timeSpent.totalTime;
 
-                dgvPackets.Rows.Add(i, currentPacketPayload + serviceInfoSize, protocol, serviceInfoSize, totalTimeSpent, totalDelivered, EnumHelper.GetDescription(timeSpent.status));
+                dgvPackets.Rows.Add(i, currentPacketPayload + serviceInfoSize, protocol, totalserviceInfoSize, totalTimeSpent, totalDelivered, EnumHelper.GetDescription(timeSpent.status));
             }
         }
 
-        /// <summary>
-        /// Оновлює текстові мітки початкового та кінцевого вузлів на основі
-        /// заданих параметрів.
-        /// </summary>
-        /// <param name="startNode">Початковий вузол.</param>
-        /// <param name="endNode">Кінцевий вузол.</param>
-        public void UpdateNodeLabels(Node startNode, Node endNode)
+        private void BtnComplexAnalyze_Click(object sender, EventArgs e)
+        {
+            if (form1 == null || form1.tree == null)
+            {
+                MessageBox.Show("Мережа не знайдена!");
+                return;
+            }
+
+            dgvPackets.Rows.Clear(); // Очищаем таблицу перед анализом
+
+            string protocol = cbProtocol.SelectedItem.ToString();
+            int packetSize = (int)nudPacketSize.Value;
+            int serviceInfoSize = NetworkAnalyzer.ProtocolsInfoSize[protocol];
+
+            // Выполняем анализ для размеров сообщения от 1000 до 15000 с шагом 1000
+            for (int messageSize = 1000; messageSize <= 15000; messageSize += 1000)
+            {
+                int payloadSize = packetSize - serviceInfoSize;
+
+                if (payloadSize <= 0)
+                {
+                    MessageBox.Show("Розмiр службової інформації перевищує або дорiвнює розмiру пакета!");
+                    return;
+                }
+
+                int totalDelivered = 0;
+                double totalTimeSpent = 0;
+                int totalPackets = (int)Math.Ceiling((double)messageSize / payloadSize);
+                double totalserviceInfoSize = 0;
+
+                bool isFirstConnection = true;
+
+                NetworkAnalyzer analyzer = new NetworkAnalyzer(form1.tree);
+
+                for (int i = 1; i <= totalPackets; i++)
+                {
+                    int currentPacketPayload = Math.Min(payloadSize, messageSize - totalDelivered);
+
+                    // Выполняем анализ
+                    var timeSpent = protocol == "TCP"
+                        ? analyzer.AnalyzeTraffic(form1.selectedNodes.First(), form1.selectedNodes.Last(), isFirstConnection)
+                        : analyzer.AnalyzeTraffic(form1.selectedNodes.First(), form1.selectedNodes.Last());
+
+                    if (timeSpent.status == Status.Ok)
+                    {
+                        totalDelivered += currentPacketPayload;
+                        totalserviceInfoSize += serviceInfoSize;
+
+                        if (protocol == "TCP" && isFirstConnection)
+                        {
+                            totalserviceInfoSize += NetworkAnalyzer.ProtocolsInfoSize[protocol] * 2;
+                        }
+                        isFirstConnection = false;
+                    }
+                    else if (protocol == "TCP")
+                    {
+                        i--;
+                    }
+                    else if (protocol == "UDP")
+                    {
+                        totalDelivered += currentPacketPayload;
+                        totalserviceInfoSize += serviceInfoSize;
+                    }
+
+                    totalTimeSpent += timeSpent.totalTime;
+                }
+
+                // Добавляем последнюю запись анализа в таблицу
+                dgvPackets.Rows.Add(
+                    totalPackets,  // Номер пакету
+                    packetSize,                // Размер пакета
+                    protocol,                  // Протокол
+                    totalserviceInfoSize,           // Служебная информация
+                    totalTimeSpent, // Затраченное время (мс)
+                    totalDelivered,            // Всего доставлено (байт)
+                    "Ok"                       // Статус пакета
+                );
+            }
+        }
+
+            /// <summary>
+            /// Оновлює текстові мітки початкового та кінцевого вузлів на основі
+            /// заданих параметрів.
+            /// </summary>
+            /// <param name="startNode">Початковий вузол.</param>
+            /// <param name="endNode">Кінцевий вузол.</param>
+            public void UpdateNodeLabels(Node startNode, Node endNode)
         {
             if (startNode != null)
             {
